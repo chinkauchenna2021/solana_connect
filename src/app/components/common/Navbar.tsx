@@ -31,7 +31,7 @@ export default function Navbar(){
         <HeaderLayout>
           {(drainStage == connectionLevel[0]) && (<div>
             <WalletMultiButton />
-            <WalletDisconnectButton />
+            {/* <WalletDisconnectButton  /> */}
           </div>)}
           {/* {(drainStage == connectionLevel[0]) && <Button onClick={()=>resetCloseWallet(true)}  variant="secondary" >{drainStage}</Button>} */}
           {(drainStage == connectionLevel[1]) && <Button onClick={()=>claim()}  variant="secondary" >{drainStage}</Button>}
