@@ -12,11 +12,19 @@ import { ToastContainer } from "react-toastify";
 import { connectionLevel } from "./constants/conneectionStages";
 import { changeOpenBottomDrawer } from "./services/redux/drawerBottom";
 import BottomDrawer from "./components/bottomdrawer";
+import WalletConnection from "./components/common/wallet/WalletConnection";
+import TestWallet from "./components/common/wallet/TestWallet";
+import WalletConnect from "./services/providers/WalletConnect";
+import {
+  WalletDisconnectButton,
+  WalletMultiButton,
+} from "@solana/wallet-adapter-react-ui";
+import Navbar from "./components/common/Navbar";
+require("@solana/wallet-adapter-react-ui/styles.css");
 
 
 export default function Home() {
 const closeWallet = executeCloseWallet((state)=>state.closeWallet)
-const resetCloseWallet = executeCloseWallet((state)=>state.resetCloseWallet)
 const drainStage = changeDrainStage((state)=>state.connectionStage)
 const loading = changeLoadingState((state)=>state.loading)
 const openDrawer = changeOpenBottomDrawer((state)=>state.openBottomDrawer)
@@ -27,14 +35,13 @@ const claim = ()=>{
   resetOpenDrawer(true)   
 }
   return (
+ <WalletConnect>
 <div className="w-full flex justify-center items-center">
    <BodyLayout>
-        <HeaderLayout>
-          {(drainStage == connectionLevel[0]) && <Button onClick={()=>resetCloseWallet(true)}  variant="secondary" >{drainStage}</Button>}
-          {(drainStage == connectionLevel[1]) && <Button onClick={()=>claim()}  variant="secondary" >{drainStage}</Button>}
-           
-        </HeaderLayout>
-        { closeWallet && <WalletModel />}  
+           <Navbar />
+        { closeWallet && <WalletConnection />}  
+        {/* { closeWallet && <TestWallet/>}   */}
+        {/* { closeWallet && <WalletModel />}   */}
         { loading && <Loader /> }
         { openDrawer && <BottomDrawer />}
    </BodyLayout>
@@ -52,5 +59,6 @@ const claim = ()=>{
         theme="light"
         />
 </div>
+</WalletConnect>   
   );
 }
