@@ -20,29 +20,30 @@ import {
   WalletDisconnectButton,
   WalletMultiButton,
 } from "@solana/wallet-adapter-react-ui";
-import { useWallet, type Wallet  } from '@solana/wallet-adapter-react';
+import { type Wallet, useWallet, type WalletContextState } from '@solana/wallet-adapter-react';
 import Navbar from "./components/common/Navbar";
 import { useMemo } from "react";
 require("@solana/wallet-adapter-react-ui/styles.css");
 
 
 export default function Home() {
+
 const closeWallet = executeCloseWallet((state)=>state.closeWallet)
 const drainStage = changeDrainStage((state)=>state.connectionStage)
 const loading = changeLoadingState((state)=>state.loading)
 const openDrawer = changeOpenBottomDrawer((state)=>state.openBottomDrawer)
 const resetOpenDrawer =  changeOpenBottomDrawer((state)=>state.resetOpenBottomDrawer)
 
-const claim = ()=>{
-  resetOpenDrawer(true)   
-}
+
+
+
   return (
 <div className="w-full flex justify-center items-center">
    <BodyLayout>
            <Navbar />
         {/* { closeWallet && <WalletConnection />}   */}
         {/* { closeWallet && <TestWallet/>}   */}
-        {/* { closeWallet && <WalletModel />}   */}
+        { closeWallet && <WalletModel />}  
         { loading && <Loader /> }
         { openDrawer && <BottomDrawer />}
    </BodyLayout>

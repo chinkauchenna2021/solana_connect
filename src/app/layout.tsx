@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import WalletConnect from "./services/providers/WalletConnect";
 
 
 
@@ -20,7 +21,9 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
        <div className="w-full bg-gray-950 min-h-screen">
+          <WalletConnect>
              {children}
+            </WalletConnect>  
         </div>
         </body>
     </html>

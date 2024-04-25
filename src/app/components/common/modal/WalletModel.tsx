@@ -9,6 +9,7 @@ import { WalletDisplay , WalletDisplayAllConnection } from './component/WalletDi
 import { changeShowWallet } from '@/app/services/redux/store'
 import { executeCloseWallet } from '@/app/services/redux/closeModel'
 import ModalLayout from '@/app/layouts/ModalLayout'
+import { type Wallet } from '@solana/wallet-adapter-react'
 
 const WalletModel = () => {
 const showWallets = changeShowWallet((state)=>state.ShowAllWallet)
@@ -19,6 +20,7 @@ const closeModal = ()=>{
     closeWallet(false);
     resetShowWallet(false)
 }
+
 
   return (
     <ModalLayout>
@@ -34,9 +36,9 @@ const closeModal = ()=>{
 
               <div className="w-full h-fit py-3 space-y-4 px-3">
                 {!showWallets?
-                   <WalletDisplay walletOptions={WalletConnectionContents } />                                
+                   <WalletDisplay />                                
                    :
-                   <WalletDisplayAllConnection walletOptions={WalletConnectionContents } />
+                   <WalletDisplayAllConnection  />
                 }
               </div>
           </div>

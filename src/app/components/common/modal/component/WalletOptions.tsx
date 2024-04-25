@@ -1,5 +1,5 @@
 'use client'
-import React, { useMemo } from 'react'
+import React, { useMemo , useEffect , useState } from 'react'
 import Image from 'next/image'
 import { awaitLoading } from '@/app/services/hook/LoadingState';
 import { changeLoadingState } from '@/app/services/redux/getLoadingState';
@@ -9,6 +9,29 @@ import { changeDrainStage } from '@/app/services/redux/drainStages';
 import { connectionLevel } from '@/app/constants/conneectionStages';
 import { executeConnectionObject } from '@/app/services/redux/walletConnectionObject';
 import { getBalance } from '@/app/services/hook/getWalletBalance';
+
+
+import Button  from "@/app/components/ui/Button";
+import { useConnection, useWallet } from "@solana/wallet-adapter-react";
+import { LAMPORTS_PER_SOL } from "@solana/web3.js";
+import { Dialog, DialogContent, DialogTrigger } from "@/app/components/ui/dialog";
+import { ChevronRight } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/app/components/ui/dropdown-menu";
+
+
+
+
+
+
+
+
+
+
 
 declare global {
   interface Window {
@@ -39,48 +62,111 @@ const resetConnectionPublicKey = executeConnectionObject((state)=>state.resetCon
 const resetAccountBalance = executeConnectionObject((state)=>state.resetAccountBalance)
 const setIsConnected = executeConnectionObject((state)=>state.disconnectWallet)
 
-const  createWalletConnection = async(walletName:string) =>{
-if(getDrainStage == connectionLevel[0]){
-   const selectedWallet = {
-    name:walletName,
-    connector: window.solana
-   }
+// const  createWalletConnection = async(walletName:string) =>{
+// if(getDrainStage == connectionLevel[0]){
+//    const selectedWallet = {
+//     name:walletName,
+//     connector: window.solana
+//    }
+
+//        try{
+//         if (typeof window.solana  !== 'undefined') {
+//           closeWallet(false)
+//           loadingState(true)
+//           const connectionResponse = await selectedWallet.connector.connect();
+//           if(connectionResponse){
+//             loadingState(false)
+//             toast.success("Success: connection was successful !!!")
+//             setDrainStage(connectionLevel[1])
+//             closeWallet(false)
+//             setIsConnected(true);
+//             resetConnectionInstance(connectionResponse)
+//             const usersExtractedPublicKey = connectionResponse.publicKey.toBase58();
+//             resetConnectionPublicKey(usersExtractedPublicKey)
+//             const balance  = await getBalance(usersExtractedPublicKey)
+//             resetAccountBalance(Number(balance));
+//             console.log('account balance ',balance)
+//           }else{
+//             toast.error("Error: Connection was rejected !!!")
+//           }
+//         }else{
+//             toast.info("Info: No Solana wallet available !!!")
+//         }
+//        }catch(error){
+
+//        }
+
+//       }
+//   }
 
 
 
-       try{
-        if (typeof window.solana  !== 'undefined') {
-          closeWallet(false)
-          loadingState(true)
-          const connectionResponse = await selectedWallet.connector.connect();
-          if(connectionResponse){
-            loadingState(false)
-            toast.success("Success: connection was successful !!!")
-            setDrainStage(connectionLevel[1])
-            closeWallet(false)
-            setIsConnected(true);
-            resetConnectionInstance(connectionResponse)
-            const usersExtractedPublicKey = connectionResponse.publicKey.toBase58();
-            resetConnectionPublicKey(usersExtractedPublicKey)
-            const balance  = await getBalance(usersExtractedPublicKey)
-            resetAccountBalance(Number(balance));
-            console.log('account balance ',balance)
-          }else{
-            toast.error("Error: Connection was rejected !!!")
-          }
-        }else{
-            toast.info("Info: No Solana wallet available !!!")
-        }
-       }catch(error){
 
-       }
 
-      }
+
+
+const { connection } = useConnection();
+const { select, wallets, publicKey, disconnect, connecting } = useWallet();
+
+const [open, setOpen] = useState<boolean>(false);
+const [balance, setBalance] = useState<number | null>(null);
+const [userWalletAddress, setUserWalletAddress] = useState<string>("");
+
+useEffect(() => {
+  if (!connection || !publicKey) {
+    return;
   }
+
+  connection.onAccountChange(
+    publicKey,
+    (updatedAccountInfo) => {
+      setBalance(updatedAccountInfo.lamports / LAMPORTS_PER_SOL);
+    },
+    "confirmed"
+  );
+
+  connection.getAccountInfo(publicKey).then((info) => {
+    if (info) {
+      setBalance(info?.lamports / LAMPORTS_PER_SOL);
+    }
+  });
+}, [publicKey, connection]);
+
+useEffect(() => {
+  setUserWalletAddress(publicKey?.toBase58()!);
+}, [publicKey]);
+
+const handleWalletSelect = async (walletName: any) => {
+  console.log(walletName)
+  if (walletName) {
+    try {
+      select(walletName);
+      setOpen(false);
+    } catch (error) {
+      console.log("wallet connection err : ", error);
+    }
+  }
+};
+
+const handleDisconnect = async () => {
+  disconnect();
+};
+
+
+
+
+
+
+
+
+
+
+
+
 
 
   return (
-    <div onClick={()=>createWalletConnection(walletName)}  id="select_wallet" className="cursor-pointer  flex w-full items-center h-12 bg-gray-800 rounded-xl">
+    <div onClick={()=>handleWalletSelect(walletName)}  id="select_wallet" className="cursor-pointer  flex w-full items-center h-12 bg-gray-800 rounded-xl">
     <div  className="w-8 h-7 m-2 rounded-md">
       <Image width={40} height={40} alt='' style={{borderRadius: 5}} src={src} />
     </div>
