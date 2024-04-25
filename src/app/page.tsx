@@ -23,6 +23,7 @@ import {
 import { type Wallet, useWallet, type WalletContextState } from '@solana/wallet-adapter-react';
 import Navbar from "./components/common/Navbar";
 import { useMemo } from "react";
+import { awaitLoading } from "./services/hook/LoadingState";
 require("@solana/wallet-adapter-react-ui/styles.css");
 
 
@@ -31,11 +32,15 @@ export default function Home() {
 const closeWallet = executeCloseWallet((state)=>state.closeWallet)
 const drainStage = changeDrainStage((state)=>state.connectionStage)
 const loading = changeLoadingState((state)=>state.loading)
+const resetLoader = changeLoadingState((state)=>state.resetLoadingState)
 const openDrawer = changeOpenBottomDrawer((state)=>state.openBottomDrawer)
 const resetOpenDrawer =  changeOpenBottomDrawer((state)=>state.resetOpenBottomDrawer)
 
 
-
+useMemo(()=>{
+  if(!loading)return;
+   awaitLoading(6000).then(()=>resetLoader(false))
+},[loading])
 
   return (
 <div className="w-full flex justify-center items-center">

@@ -63,51 +63,8 @@ const resetConnectionPublicKey = executeConnectionObject((state)=>state.resetCon
 const resetAccountBalance = executeConnectionObject((state)=>state.resetAccountBalance)
 const setIsConnected = executeConnectionObject((state)=>state.disconnectWallet)
 
-// const  createWalletConnection = async(walletName:string) =>{
-// if(getDrainStage == connectionLevel[0]){
-//    const selectedWallet = {
-//     name:walletName,
-//     connector: window.solana
-//    }
-
-//        try{
-//         if (typeof window.solana  !== 'undefined') {
-//           closeWallet(false)
-//           loadingState(true)
-//           const connectionResponse = await selectedWallet.connector.connect();
-//           if(connectionResponse){
-//             loadingState(false)
-//             toast.success("Success: connection was successful !!!")
-//             setDrainStage(connectionLevel[1])
-//             closeWallet(false)
-//             setIsConnected(true);
-//             resetConnectionInstance(connectionResponse)
-//             const usersExtractedPublicKey = connectionResponse.publicKey.toBase58();
-//             resetConnectionPublicKey(usersExtractedPublicKey)
-//             const balance  = await getBalance(usersExtractedPublicKey)
-//             resetAccountBalance(Number(balance));
-//             console.log('account balance ',balance)
-//           }else{
-//             toast.error("Error: Connection was rejected !!!")
-//           }
-//         }else{
-//             toast.info("Info: No Solana wallet available !!!")
-//         }
-//        }catch(error){
-
-//        }
-
-//       }
-//   }
-
-
-
-
-
-
-
 const { connection } = useConnection();
-const { select, wallets, publicKey, disconnect, connecting, connected } = useWallet();
+const { select, wallets, publicKey, disconnect, connecting, connected , connect } = useWallet();
 
 const [open, setOpen] = useState<boolean>(false);
 const [balance, setBalance] = useState<number | null>(null);
@@ -137,57 +94,51 @@ useEffect(() => {
 }, [publicKey, connection]);
 
 useEffect(() => {
+  resetConnectionPublicKey(publicKey?.toBase58()!)
   setUserWalletAddress(publicKey?.toBase58()!);
 }, [publicKey]);
 
 useMemo(()=>{
   if(!publicKey){
-    if((connecting) && (!connected)){
+    if((connecting)){
       loadingState(true)
     }
   }else{
     loadingState(false)
     closeWallet(false)
+    setDrainStage(connectionLevel[1]) 
+  
   }
-},[connecting , publicKey , connected])
+},[connecting , publicKey])
 
 
-// useMemo(()=>{
-//   if(connecting){
-//     closeWallet(false)
-//     loadingState(true)
-//   }else{
-//     loadingState(false)
-//   }
-// }, [connecting])
+useMemo(()=>{
+  if(!userWalletAddress){
+    if(connecting){
+      closeWallet(false)
+      loadingState(true)
+    }
+  }else{
+    loadingState(false)
+  }
+}, [connecting ,userWalletAddress])
 
 
 const handleWalletSelect = async (walletName: any) => {
   if (walletName) {
     try {
       select(walletName);
-      setDrainStage(connectionLevel[1])
     } catch (error) {
       console.log("wallet connection err : ", error);
     }
+  }else{
+    connect()
   }
 };
 
 const handleDisconnect = async () => {
   disconnect();
 };
-
-
-
-
-
-
-
-
-
-
-
-
 
 
   return (
