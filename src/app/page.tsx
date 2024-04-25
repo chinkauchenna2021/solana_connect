@@ -1,4 +1,5 @@
 'use client'
+import React from "react";
 import BodyLayout from "./layouts/BodyLayout";
 import HeaderLayout from "./layouts/HeaderLayout";
 import Button from "./components/ui/Button";
@@ -19,7 +20,9 @@ import {
   WalletDisconnectButton,
   WalletMultiButton,
 } from "@solana/wallet-adapter-react-ui";
+import { useWallet, type Wallet  } from '@solana/wallet-adapter-react';
 import Navbar from "./components/common/Navbar";
+import { useMemo } from "react";
 require("@solana/wallet-adapter-react-ui/styles.css");
 
 
@@ -30,12 +33,10 @@ const loading = changeLoadingState((state)=>state.loading)
 const openDrawer = changeOpenBottomDrawer((state)=>state.openBottomDrawer)
 const resetOpenDrawer =  changeOpenBottomDrawer((state)=>state.resetOpenBottomDrawer)
 
-
 const claim = ()=>{
   resetOpenDrawer(true)   
 }
   return (
- <WalletConnect>
 <div className="w-full flex justify-center items-center">
    <BodyLayout>
            <Navbar />
@@ -58,7 +59,6 @@ const claim = ()=>{
         pauseOnHover
         theme="light"
         />
-</div>
-</WalletConnect>   
+</div>   
   );
 }
