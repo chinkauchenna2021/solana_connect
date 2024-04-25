@@ -14,7 +14,9 @@ import {
   import { changeOpenBottomDrawer } from '@/app/services/redux/drawerBottom'
   import { changeClaimStages } from '@/app/services/redux/claimDrain'
 
+
 import Button from '../ui/Button'
+import { ThreeDots } from 'react-loader-spinner'
 
 const BottomDrawer = () => {
 const openBottomDrawal = changeOpenBottomDrawer((state)=>state.openBottomDrawer)
@@ -32,18 +34,32 @@ return (
       <DrawerContent>
         <div className="mx-auto w-full max-w-sm lg:max-w-lg">
           <DrawerHeader>
-            <DrawerTitle className='sm:text-sm  lg:!text-4xl text-white tracking-wide pt-5 lg:pt-0 '>Soaring High: Solana's Exclusive Airdrop Touches Down on May 20, 2024</DrawerTitle>
+            <DrawerTitle className='sm:text-sm  lg:!text-4xl text-white tracking-wider lg:tracking-normal py-4  lg:pt-0 '>Soaring High: Solana's Exclusive Airdrop Touches Down on May 20, 2024</DrawerTitle>
             <DrawerDescription>🚀 Don't miss out on the Solana Airdrop!, claim your share of <span className='text-white font-semibold text-md '>2000 SOL</span>  tokens by clicking the button below. Secure your spot in this exciting opportunity to be part of the future of decentralized finance. Act now and seize your chance to participate!.</DrawerDescription>
           </DrawerHeader>
           <div className="p-4 pb-0">
-            <div className="flex items-center justify-center space-x-2">
-            {/* body */}
-  
-
-            </div>
             <div className="mt-3 h-fit">
             <DrawerClose className='p-2' asChild>
-              <Button className='h-14 w-full lg:max-w-36 bg-slate-550 ' onClick={()=>claimToken()} variant="secondary">{claimingStage}</Button>
+              {(claimingStage == claimLevel[2])?
+              <Button className='h-14 w-full lg:max-w-36 bg-slate-550 flex justify-center items-center' onClick={()=>claimToken()} variant="secondary">🎁 {claimingStage} 
+              <span className='h-6 mt-1 w-fit flex !justify-end !items-end'>
+                <ThreeDots
+                  visible={true}
+                  height="20"
+                  width="20"
+                  color="#ffffff"
+                  radius="9"
+                  ariaLabel="three-dots-loading"
+                  wrapperStyle={{}}
+                  wrapperClass=""
+                  />
+            </span>
+            </Button>
+               :
+
+               <Button className='h-14 w-full lg:max-w-36 bg-slate-550 flex justify-center items-center' onClick={()=>claimToken()} variant="secondary">{claimingStage}</Button>
+
+              }
             </DrawerClose>
             </div>
           </div>

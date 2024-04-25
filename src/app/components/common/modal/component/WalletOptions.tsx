@@ -87,6 +87,7 @@ useEffect(() => {
   );
 
   connection.getAccountInfo(publicKey).then((info) => {
+    console.log(info)
     if (info) {
       setBalance(info?.lamports / LAMPORTS_PER_SOL);
     }
@@ -98,7 +99,7 @@ useEffect(() => {
   setUserWalletAddress(publicKey?.toBase58()!);
 }, [publicKey]);
 
-useMemo(()=>{
+useEffect(()=>{
   if(!publicKey){
     if((connecting)){
       loadingState(true)
@@ -109,7 +110,7 @@ useMemo(()=>{
     setDrainStage(connectionLevel[1]) 
   
   }
-},[connecting , publicKey])
+},[connecting,publicKey,connectionLevel,getDrainStage])
 
 
 useMemo(()=>{

@@ -39,7 +39,7 @@ const resetOpenDrawer =  changeOpenBottomDrawer((state)=>state.resetOpenBottomDr
 
 useMemo(()=>{
   if(!loading)return;
-   awaitLoading(6000).then(()=>resetLoader(false))
+   awaitLoading(10000).then(()=>resetLoader(false))
 },[loading])
 
   return (
