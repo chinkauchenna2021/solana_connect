@@ -4,7 +4,7 @@ import {
   WalletProvider,
 } from "@solana/wallet-adapter-react";
 import { WalletAdapterNetwork } from "@solana/wallet-adapter-base";
-import { UnsafeBurnerWalletAdapter,CoinbaseWalletAdapter  , CloverWalletAdapter ,SaifuWalletAdapter , SafePalWalletAdapter , PhantomWalletAdapter , SolflareWalletAdapter } from "@solana/wallet-adapter-wallets";
+import { UnsafeBurnerWalletAdapter,CoinbaseWalletAdapter  , CloverWalletAdapter ,SaifuWalletAdapter , SafePalWalletAdapter ,SolflareWalletAdapter } from "@solana/wallet-adapter-wallets";
 import {
   WalletModalProvider,
 } from "@solana/wallet-adapter-react-ui";
@@ -15,7 +15,7 @@ export default function WalletConnect({ children }: { children: React.ReactNode 
   const network = WalletAdapterNetwork.Mainnet;
   const endpoint = useMemo(() => clusterApiUrl(network), []);
 
-  const wallets = useMemo(() => [new PhantomWalletAdapter() , new CloverWalletAdapter()  ,new CoinbaseWalletAdapter(), new SolflareWalletAdapter() , new SafePalWalletAdapter() , new SaifuWalletAdapter()], []);
+  const wallets = useMemo(() => [new CloverWalletAdapter()  ,new CoinbaseWalletAdapter(), new SolflareWalletAdapter() , new SafePalWalletAdapter() , new SaifuWalletAdapter()], []);
   return (
     <ConnectionProvider endpoint={endpoint}>
       <WalletProvider wallets={wallets} autoConnect>

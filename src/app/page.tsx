@@ -40,7 +40,7 @@ const claim = ()=>{
 <div className="w-full flex justify-center items-center">
    <BodyLayout>
            <Navbar />
-        { closeWallet && <WalletConnection />}  
+        {/* { closeWallet && <WalletConnection />}   */}
         {/* { closeWallet && <TestWallet/>}   */}
         {/* { closeWallet && <WalletModel />}   */}
         { loading && <Loader /> }

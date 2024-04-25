@@ -21,6 +21,6 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src/app/components/common/CustomConnection/baseWallet/BaseWalletConnectionButton.tsx", "src/app/components/common/CustomConnection/baseWallet/WalletIcon.tsx", "src/app/components/common/CustomConnection/baseWallet/useWalletModal.tsx"],
   "exclude": ["node_modules"]
 }
