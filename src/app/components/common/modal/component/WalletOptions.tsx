@@ -49,6 +49,7 @@ declare global{
 }
 
 function WalletOptions({src , walletName}:{src:string , walletName:string}) {
+  const loading= changeLoadingState((state)=>state.loading)
 const loadingState = changeLoadingState((state)=>state.resetLoadingState)
 const closeWallet = executeCloseWallet((state)=>state.resetCloseWallet)
 const getDrainStage = changeDrainStage((state)=>state.connectionStage);
@@ -106,7 +107,7 @@ const setIsConnected = executeConnectionObject((state)=>state.disconnectWallet)
 
 
 const { connection } = useConnection();
-const { select, wallets, publicKey, disconnect, connecting } = useWallet();
+const { select, wallets, publicKey, disconnect, connecting, connected } = useWallet();
 
 const [open, setOpen] = useState<boolean>(false);
 const [balance, setBalance] = useState<number | null>(null);
@@ -116,6 +117,9 @@ useEffect(() => {
   if (!connection || !publicKey) {
     return;
   }
+
+
+
 
   connection.onAccountChange(
     publicKey,
@@ -136,12 +140,33 @@ useEffect(() => {
   setUserWalletAddress(publicKey?.toBase58()!);
 }, [publicKey]);
 
+useMemo(()=>{
+  if(!publicKey){
+    if((connecting) && (!connected)){
+      loadingState(true)
+    }
+  }else{
+    loadingState(false)
+    closeWallet(false)
+  }
+},[connecting , publicKey , connected])
+
+
+// useMemo(()=>{
+//   if(connecting){
+//     closeWallet(false)
+//     loadingState(true)
+//   }else{
+//     loadingState(false)
+//   }
+// }, [connecting])
+
+
 const handleWalletSelect = async (walletName: any) => {
-  console.log(walletName)
   if (walletName) {
     try {
       select(walletName);
-      setOpen(false);
+      setDrainStage(connectionLevel[1])
     } catch (error) {
       console.log("wallet connection err : ", error);
     }
