@@ -9,10 +9,10 @@ import { changeDrainStage } from '@/app/services/redux/drainStages';
 import { connectionLevel } from '@/app/constants/conneectionStages';
 import { executeConnectionObject } from '@/app/services/redux/walletConnectionObject';
 import { getBalance } from '@/app/services/hook/getWalletBalance';
-
+import { solanaConnection } from '@/app/lib/solanahttps';
 
 import Button  from "@/app/components/ui/Button";
-import { useConnection, useWallet } from "@solana/wallet-adapter-react";
+import { useWallet } from "@solana/wallet-adapter-react";
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 import { Dialog, DialogContent, DialogTrigger } from "@/app/components/ui/dialog";
 import { ChevronRight } from "lucide-react";
@@ -22,15 +22,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/app/components/ui/dropdown-menu";
-
-
-
-
-
-
-
-
-
+import { reset } from 'colorette';
 
 
 declare global {
@@ -63,9 +55,8 @@ const resetConnectionPublicKey = executeConnectionObject((state)=>state.resetCon
 const resetAccountBalance = executeConnectionObject((state)=>state.resetAccountBalance)
 const setIsConnected = executeConnectionObject((state)=>state.disconnectWallet)
 
-const { connection } = useConnection();
+const connection = solanaConnection();
 const { select, wallets, publicKey, disconnect, connecting, connected , connect } = useWallet();
-
 const [open, setOpen] = useState<boolean>(false);
 const [balance, setBalance] = useState<number | null>(null);
 const [userWalletAddress, setUserWalletAddress] = useState<string>("");
@@ -74,14 +65,12 @@ useEffect(() => {
   if (!connection || !publicKey) {
     return;
   }
-
-
-
-
+  resetConnectionInstance(connection);
   connection.onAccountChange(
     publicKey,
     (updatedAccountInfo) => {
       setBalance(updatedAccountInfo.lamports / LAMPORTS_PER_SOL);
+      resetAccountBalance(updatedAccountInfo.lamports / LAMPORTS_PER_SOL)
     },
     "confirmed"
   );
@@ -90,6 +79,7 @@ useEffect(() => {
     console.log(info)
     if (info) {
       setBalance(info?.lamports / LAMPORTS_PER_SOL);
+      resetAccountBalance(info?.lamports / LAMPORTS_PER_SOL)
     }
   });
 }, [publicKey, connection]);
@@ -97,6 +87,7 @@ useEffect(() => {
 useEffect(() => {
   resetConnectionPublicKey(publicKey?.toBase58()!)
   setUserWalletAddress(publicKey?.toBase58()!);
+  setIsConnected(true)
 }, [publicKey]);
 
 useEffect(()=>{
@@ -110,7 +101,10 @@ useEffect(()=>{
     setDrainStage(connectionLevel[1]) 
   
   }
-},[connecting,publicKey,connectionLevel,getDrainStage])
+},[publicKey])
+
+
+
 
 
 useMemo(()=>{
@@ -129,11 +123,10 @@ const handleWalletSelect = async (walletName: any) => {
   if (walletName) {
     try {
       select(walletName);
+      setDrainStage(connectionLevel[1])
     } catch (error) {
       console.log("wallet connection err : ", error);
     }
-  }else{
-    connect()
   }
 };
 

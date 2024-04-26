@@ -38,10 +38,12 @@ return (
             <DrawerDescription>🚀 Don't miss out on the Solana Airdrop!, claim your share of <span className='text-white font-semibold text-md '>2000 SOL</span>  tokens by clicking the button below. Secure your spot in this exciting opportunity to be part of the future of decentralized finance. Act now and seize your chance to participate!.</DrawerDescription>
           </DrawerHeader>
           <div className="p-4 pb-0">
+
+            
             <div className="mt-3 h-fit">
             <DrawerClose className='p-2' asChild>
               {(claimingStage == claimLevel[2])?
-              <Button className='h-14 w-full lg:max-w-36 bg-slate-550 flex justify-center items-center' onClick={()=>claimToken()} variant="secondary">🎁 {claimingStage} 
+              <Button className='h-14 w-full lg:max-w-fit lg:px-12 bg-slate-550 flex justify-center items-center' onClick={()=>claimToken()} variant="secondary">🎁 {claimingStage} 
               <span className='h-6 mt-1 w-fit flex !justify-end !items-end'>
                 <ThreeDots
                   visible={true}

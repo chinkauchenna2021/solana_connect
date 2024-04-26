@@ -5,7 +5,6 @@ import WalletConnect from "./services/providers/WalletConnect";
 
 
 
-
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {

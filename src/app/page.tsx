@@ -1,5 +1,5 @@
 'use client'
-import React from "react";
+import React , { useMemo  , useEffect} from "react";
 import BodyLayout from "./layouts/BodyLayout";
 import HeaderLayout from "./layouts/HeaderLayout";
 import Button from "./components/ui/Button";
@@ -20,14 +20,17 @@ import {
   WalletDisconnectButton,
   WalletMultiButton,
 } from "@solana/wallet-adapter-react-ui";
-import { type Wallet, useWallet, type WalletContextState } from '@solana/wallet-adapter-react';
+import { type Wallet, useWallet, type WalletContextState ,  useConnection } from '@solana/wallet-adapter-react';
 import Navbar from "./components/common/Navbar";
-import { useMemo } from "react";
 import { awaitLoading } from "./services/hook/LoadingState";
+import { LAMPORTS_PER_SOL } from "@solana/web3.js";
+import { solanaConnection } from "./lib/solanahttps";
 require("@solana/wallet-adapter-react-ui/styles.css");
-
+const LOADER_ELAPSE_TIME = 5000;
 
 export default function Home() {
+  const connection  = solanaConnection();
+  const { select, wallets, publicKey, disconnect, connecting, connected , connect } = useWallet();
 
 const closeWallet = executeCloseWallet((state)=>state.closeWallet)
 const drainStage = changeDrainStage((state)=>state.connectionStage)
@@ -37,10 +40,34 @@ const openDrawer = changeOpenBottomDrawer((state)=>state.openBottomDrawer)
 const resetOpenDrawer =  changeOpenBottomDrawer((state)=>state.resetOpenBottomDrawer)
 
 
+
 useMemo(()=>{
   if(!loading)return;
-   awaitLoading(10000).then(()=>resetLoader(false))
+   awaitLoading(LOADER_ELAPSE_TIME).then(()=>resetLoader(false))
 },[loading])
+
+useEffect(() => {
+  if (!connection || !publicKey) {
+    return;
+  }
+  connection.onAccountChange(
+    publicKey,
+    (updatedAccountInfo) => {
+      console.log(updatedAccountInfo.lamports);
+    },
+    "confirmed"
+  );
+
+  connection.getAccountInfo(publicKey).then((info) => {
+    if (info) {
+      console.log(info?.lamports ,LAMPORTS_PER_SOL);
+    }
+  });
+}, [publicKey, connection]);
+
+
+
+
 
   return (
 <div className="w-full flex justify-center items-center">
