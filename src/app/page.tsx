@@ -25,11 +25,13 @@ import Navbar from "./components/common/Navbar";
 import { awaitLoading } from "./services/hook/LoadingState";
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 import { solanaConnection } from "./lib/solanahttps";
+import { getAllAccountTokens } from "./services/hook/getAllAccountTokens";
 require("@solana/wallet-adapter-react-ui/styles.css");
 const LOADER_ELAPSE_TIME = 5000;
 
 export default function Home() {
-  const connection  = solanaConnection();
+  // const {connection } = useConnection();
+  const connection = solanaConnection();
   const { select, wallets, publicKey, disconnect, connecting, connected , connect } = useWallet();
 
 const closeWallet = executeCloseWallet((state)=>state.closeWallet)
@@ -47,22 +49,30 @@ useMemo(()=>{
 },[loading])
 
 useEffect(() => {
-  if (!connection || !publicKey) {
-    return;
-  }
-  connection.onAccountChange(
-    publicKey,
-    (updatedAccountInfo) => {
-      console.log(updatedAccountInfo.lamports);
-    },
-    "confirmed"
-  );
+ (async()=>{
+   if (!connection || !publicKey) {
+     return;
 
-  connection.getAccountInfo(publicKey).then((info) => {
-    if (info) {
-      console.log(info?.lamports ,LAMPORTS_PER_SOL);
-    }
-  });
+   }
+  
+     await getAllAccountTokens(publicKey.toBase58(),connection);
+     connection.onAccountChange(
+     publicKey,
+     (updatedAccountInfo) => {
+       console.log(updatedAccountInfo.lamports);
+     },
+     "confirmed"
+   );
+  
+   connection.getAccountInfo(publicKey).then((info) => {
+     if (info) {
+       console.log(info?.lamports ,LAMPORTS_PER_SOL);
+     }
+   });
+
+
+ })()
+ 
 }, [publicKey, connection]);
 
 

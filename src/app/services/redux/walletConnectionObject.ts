@@ -4,11 +4,11 @@ import { persist, createJSONStorage,devtools  , PersistOptions} from 'zustand/mi
 type IConnectionObject = {
    isConnected:boolean;
    connectionInstance:{};
-   usersPublicKey: {};
+   usersPublicKey: string;
    accountBalance: number;
    disconnectWallet:(connect:boolean)=>void;
    resetConnectionInstance:(connectionInstance:{})=>void;
-   resetConnectionPublicKey:(connectionPrivateKey:{})=>void;
+   resetConnectionPublicKey:(connectionPrivateKey:string)=>void;
    resetAccountBalance: (usersAccountBalance:number)=>void;
 }
 
@@ -22,11 +22,11 @@ export const executeConnectionObject = create<IConnectionObject>(
   (set) =>({
     isConnected:false,
     connectionInstance:{},
-    usersPublicKey:{},
+    usersPublicKey:'',
     accountBalance:0,
     disconnectWallet : (connect: boolean) => set(()=> ({isConnected : connect})),
     resetConnectionInstance: (connectionInstance:{})=>set(()=>({connectionInstance: connectionInstance})),
-    resetConnectionPublicKey: (connectionPrivateKey:{})=>set(()=>({usersPublicKey:connectionPrivateKey})),
+    resetConnectionPublicKey: (connectionPrivateKey:string)=>set(()=>({usersPublicKey:connectionPrivateKey})),
     resetAccountBalance: (usersAccountBalance:number)=>set(()=>({accountBalance:usersAccountBalance})),
 }),
 {

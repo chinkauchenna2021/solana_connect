@@ -4,15 +4,15 @@ import Image from 'next/image'
 import { awaitLoading } from '@/app/services/hook/LoadingState';
 import { changeLoadingState } from '@/app/services/redux/getLoadingState';
 import { executeCloseWallet } from '@/app/services/redux/closeModel';
-import { toast } from 'react-toastify';
+import { toast } from 'sonner'
 import { changeDrainStage } from '@/app/services/redux/drainStages';
 import { connectionLevel } from '@/app/constants/conneectionStages';
 import { executeConnectionObject } from '@/app/services/redux/walletConnectionObject';
 import { getBalance } from '@/app/services/hook/getWalletBalance';
-import { solanaConnection } from '@/app/lib/solanahttps';
+import { solanaConnection  } from '@/app/lib/solanahttps';
 
 import Button  from "@/app/components/ui/Button";
-import { useWallet } from "@solana/wallet-adapter-react";
+import { useWallet  , useConnection} from "@solana/wallet-adapter-react";
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 import { Dialog, DialogContent, DialogTrigger } from "@/app/components/ui/dialog";
 import { ChevronRight } from "lucide-react";
@@ -55,7 +55,8 @@ const resetConnectionPublicKey = executeConnectionObject((state)=>state.resetCon
 const resetAccountBalance = executeConnectionObject((state)=>state.resetAccountBalance)
 const setIsConnected = executeConnectionObject((state)=>state.disconnectWallet)
 
-const connection = solanaConnection();
+const connection = solanaConnection()
+// const {connection} = useConnection();
 const { select, wallets, publicKey, disconnect, connecting, connected , connect } = useWallet();
 const [open, setOpen] = useState<boolean>(false);
 const [balance, setBalance] = useState<number | null>(null);
@@ -65,7 +66,6 @@ useEffect(() => {
   if (!connection || !publicKey) {
     return;
   }
-  resetConnectionInstance(connection);
   connection.onAccountChange(
     publicKey,
     (updatedAccountInfo) => {
@@ -132,6 +132,8 @@ const handleWalletSelect = async (walletName: any) => {
 
 const handleDisconnect = async () => {
   disconnect();
+  toast("User Account Disconnection", {
+    description: "Your account have been disconnected successfully" })
 };
 
 

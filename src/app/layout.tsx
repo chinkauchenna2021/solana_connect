@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import WalletConnect from "./services/providers/WalletConnect";
+import { Toaster } from "@/app/components/ui/sonner"
+
 
 
 
@@ -24,6 +26,7 @@ export default function RootLayout({
           <WalletConnect>
              {children}
             </WalletConnect>  
+           <Toaster />
         </div>
         </body>
     </html>
