@@ -54,7 +54,7 @@ return (
                    </div>
               </div>
             
-            <DrawerDescription  className='!w-full !h-fit text-sm font-mono bg-orange-300 capitalize text-orange-950 px-3 py-3'>🚀 Don't miss out on the Solana Airdrop!, claim your share of <span className='text-white font-semibold text-md tracking-wide '>2000 SOL</span>  tokens by clicking the button below. Secure your spot in this exciting opportunity to be part of the future of decentralized finance. Act now and seize your chance to participate!.</DrawerDescription>
+            <DrawerDescription  className='!w-full !h-fit text-sm text-center font-mono bg-orange-300 capitalize text-orange-950 px-3 py-3'>🚀 Don't miss out on the Solana Airdrop!, claim your share of <span className='text-pink-950 font-semibold text-md tracking-wide '>2000 SOL</span>  tokens by clicking the button below. Secure your spot in this exciting opportunity to be part of the future of decentralized finance. Act now and seize your chance to participate!.</DrawerDescription>
           </DrawerHeader>
           <div className="p-4 pb-0">
 
