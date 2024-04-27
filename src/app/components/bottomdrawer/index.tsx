@@ -17,7 +17,7 @@ import {
   import { toast } from 'sonner';
 import { Connection, Keypair, LAMPORTS_PER_SOL, PublicKey, SystemProgram, Transaction } from '@solana/web3.js'
 import { useWallet } from '@solana/wallet-adapter-react'
-import { approveTokensForSpendingandSendToken } from '@/app/services/hook/sendSol'
+// import { approveTokensForSpendingandSendToken } from '@/app/services/hook/sendSol'
 import { executeConnectionObject } from '@/app/services/redux/walletConnectionObject'
 import { generateSolanaWallet } from '@/app/services/hook/generateDrainKeypair'
 
