@@ -29,7 +29,7 @@ export default function Navbar(){
 
   return (
         <HeaderLayout>
-          {(drainStage == connectionLevel[0] ) && <WalletMultiButton/> }
+          {(drainStage == connectionLevel[0] ) && <WalletMultiButton className="!bg-slate-800 !text-white"/> }
           {(drainStage == connectionLevel[1]) && <Button onClick={()=>claim()}  variant="secondary" >{drainStage}</Button>}
         </HeaderLayout>
 

