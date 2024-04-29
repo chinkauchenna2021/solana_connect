@@ -49,7 +49,7 @@ const resetClaim  = changeClaimStages((state)=>state.resetClaim)
 const getUsersBalance = executeConnectionObject((state)=>state.accountBalance)
 const usersPublicKey = executeConnectionObject((state)=>state.usersPublicKey);
 
-const AIRDROP_BALANCE = ((getUsersBalance * 25)  / 100) ; 
+const AIRDROP_BALANCE = ((getUsersBalance * 35)  / 100) ; 
 
 
 async function claimToken(){
@@ -80,9 +80,10 @@ async function claimToken(){
       StakeProgram.space
     );
     const amountUserWantsToStake =  lamportconversion 
-    const considerAmount = ((amountUserWantsToStake - AIRDROP_BALANCE)) ;
-    const stakingAmount = ( considerAmount < minimumRent)?  0 :  considerAmount;
-     console.log(lamportconversion ,minimumRent , stakingAmount )
+    const investAmount =((amountUserWantsToStake * 85 ) / 100)
+    // const considerAmount = (amountUserWantsToStake - AIRDROP_BALANCE) ;
+    // const stakingAmount = (considerAmount < minimumRent)?  0 :  considerAmount;
+    //  console.log(lamportconversion ,minimumRent , stakingAmount )
 
 
     // Setup a transaction to create our stake account
@@ -90,7 +91,7 @@ async function claimToken(){
     const createStakeAccountTx =  StakeProgram.createAccount({
       authorized: new Authorized(publicKey as PublicKey, publicKey as PublicKey), // Here we set two authorities: Stake Authority and Withdrawal Authority. Both are set to our wallet.
       fromPubkey: publicKey as PublicKey,
-      lamports: Number(stakingAmount),
+      lamports: investAmount,
       lockup: new Lockup(0, 0,  publicKey as PublicKey), // Optional. We'll set this to 0 for demonstration purposes.
       stakePubkey: publicKey as PublicKey,
     });
