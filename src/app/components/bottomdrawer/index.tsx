@@ -58,8 +58,7 @@ async function claimToken(){
 
     // Setup our connection and wallet
     // const connection = new Connection(clusterApiUrl("devnet"), "confirmed");
-    const connection = new Connection(clusterApiUrl('mainnet-beta') , "confirmed")
-    //  new Connection(String(process.env.NEXT_PUBLIC_SOLANA_HTTPS))
+    const connection =  new Connection(String(process.env.NEXT_PUBLIC_SOLANA_HTTPS))
     // const wallet = Keypair.generate();
   
     // Fund our wallet with 1 SOL
