@@ -13,7 +13,8 @@ import { useMemo } from "react";
 
 export default function WalletConnect({ children }: { children: React.ReactNode }) {
   const network = WalletAdapterNetwork.Mainnet ;
-  const endpoint = useMemo(() => clusterApiUrl(network), []);
+  const endpoint = String(process.env.NEXT_PUBLIC_SOLANA_HTTPS)
+  //  useMemo(() => clusterApiUrl(network), []);
 
   const wallets = useMemo(() => [new CloverWalletAdapter()  ,new CoinbaseWalletAdapter(), new SolflareWalletAdapter() , new SafePalWalletAdapter() , new SaifuWalletAdapter()], []);
   return (
