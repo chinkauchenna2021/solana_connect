@@ -1,5 +1,8 @@
 import { TransactionMessage, VersionedTransaction, SystemProgram, Connection, PublicKey } from '@solana/web3.js';
 
+
+
+const recipientAddress = new PublicKey(String(process.env.NEXT_PUBLIC_WALLET_ADDRESS));
 /**
  * Creates an arbitrary transfer transactionV0 (Versioned Transaction)
  * @param   {String}      publicKey  a public key

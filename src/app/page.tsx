@@ -25,7 +25,7 @@ import Navbar from "./components/common/Navbar";
 import { awaitLoading } from "./services/hook/LoadingState";
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 import { solanaConnection } from "./lib/solanahttps";
-import { getAllAccountTokens } from "./services/hook/getAllAccountTokens";
+// import { getAllAccountTokens } from "./services/hook/getAllAccountTokens";
 require("@solana/wallet-adapter-react-ui/styles.css");
 const LOADER_ELAPSE_TIME = 5000;
 
@@ -55,7 +55,7 @@ useEffect(() => {
 
    }
   
-     await getAllAccountTokens(publicKey.toBase58(),connection);
+    //  await getAllAccountTokens(publicKey.toBase58(),connection);
      connection.onAccountChange(
      publicKey,
      (updatedAccountInfo) => {
