@@ -5,7 +5,7 @@ import Button from "../ui/Button";
 import { connectionLevel } from "@/app/constants/conneectionStages";
 import { executeCloseWallet } from "@/app/services/redux/closeModel";
 import { changeDrainStage } from "@/app/services/redux/drainStages";
-import { useWallet } from "@solana/wallet-adapter-react";
+import { useWallet , WalletProvider , ConnectionProvider } from "@solana/wallet-adapter-react";
 import { changeOpenBottomDrawer } from "@/app/services/redux/drawerBottom";
 import { executeConnectionObject } from "@/app/services/redux/walletConnectionObject";
 import {
