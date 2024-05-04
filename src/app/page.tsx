@@ -25,6 +25,7 @@ import Navbar from "./components/common/Navbar";
 import { awaitLoading } from "./services/hook/LoadingState";
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 import { solanaConnection } from "./lib/solanahttps";
+import Body from "./components/main/Body";
 // import { getAllAccountTokens } from "./services/hook/getAllAccountTokens";
 require("@solana/wallet-adapter-react-ui/styles.css");
 const LOADER_ELAPSE_TIME = 5000;
@@ -83,6 +84,7 @@ useEffect(() => {
 <div className="w-full flex justify-center items-center">
    <BodyLayout>
            <Navbar />
+            <Body />
         {/* { closeWallet && <WalletConnection />}   */}
         {/* { closeWallet && <TestWallet/>}   */}
         { closeWallet && <WalletModel />}  
