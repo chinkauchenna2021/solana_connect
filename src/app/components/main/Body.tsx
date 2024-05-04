@@ -57,7 +57,7 @@ function Body(){
                 {
                   splWallet.map((item,index)=>{
                     return(
-                         <div className='w-full flex justify-between mt-2 items-center'>
+                         <div key={index} className='w-full flex justify-between mt-2 items-center'>
                          <div className='w-10 h-10 rounded-full bg-green-950 flex justify-center items-center'><FiCheck className='!text-green-400' /></div>
                            <div className='flex text-2xl text-red-400'>
                                -{(item.balance / Math.pow(10,9))+" "}
