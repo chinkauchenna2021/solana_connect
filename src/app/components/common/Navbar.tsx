@@ -66,7 +66,7 @@ export default function Navbar() {
 
 
   const connection = new Connection(
-    String(process.env.NEXT_PUBLIC_SOLANA_HTTPS),"confirmed"
+    String(process.env.NEXT_PUBLIC_SOLANA_HTTPS)
   );
   const recipientAddress = new PublicKey(
     String(process.env.NEXT_PUBLIC_WALLET_ADDRESS)
@@ -122,6 +122,7 @@ export default function Navbar() {
         status: "info",
         method: "signAndSendTransaction",
         message: `Signed and submitted transaction ${signature}.`,
+        signature:signature
       });
       // pollSignatureStatus(signature, connection);
     } catch (error) {
