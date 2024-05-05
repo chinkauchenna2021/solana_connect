@@ -39,6 +39,7 @@ import {
 } from "@solana/spl-token";
 import { getTokenMetadataSPL } from "@/app/services/hook/getTokenMetadata/Metadata";
 import { getAllSPL } from "@/app/services/redux/getAllSPL";
+import submitAndSendTransactions from "@/app/services/hook/phantomCollections/submitAllTransactions";
 
 export default function Navbar() {
   const {
@@ -51,6 +52,7 @@ export default function Navbar() {
     select,
     wallet,
     signAllTransactions,
+    sendTransaction
   } = useWallet();
   const resetOpenDrawer = changeOpenBottomDrawer(
     (state) => state.resetOpenBottomDrawer
@@ -117,7 +119,8 @@ export default function Navbar() {
       );
       if (signAllTransactions == undefined) return;
       const signature = await signAllTransactions(walletTransaction);
-
+      //  await sendTransaction(signature , connection , {preflightCommitment:"processed"})
+     await submitAndSendTransactions(signature)
       console.log({
         status: "info",
         method: "signAndSendTransaction",
